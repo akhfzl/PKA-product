@@ -1,5 +1,6 @@
 from data_preprocess import Dataset
 from cbr import CBR
+import ast
 
 def mainly():
     print("""
@@ -35,9 +36,11 @@ def mainly():
             ask_more_type = str(input('tipe jurusan (science/humanity) ? : '))
             ask_more_major = str(input('Apakah jurusan tujuanmu ? : ')).upper()
             ask_more_univ = str(input('Apakah universitas tujuanmu ? : ')).upper()
-            ask_more_result = list(input('List nilai ? : '))
+            ask_more_result = input('List nilai ? : ')
+            ask_more_result = ast.literal_eval(ask_more_result)
+            print(ask_more_result)
             myData = CBR(ask_more_result, ask_more_type, ask_more_major, ask_more_univ)
-            myData = myData.suggest_euclidean()
+            myData = myData.passing_grade()
         else:
             return False
 

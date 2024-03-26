@@ -9,6 +9,8 @@ class CBR:
         self.type_jurusan = type_jurusan
         self.nama_jurusan = nama_jurusan
         self.nama_univ = nama_univ
+        self.kapasitas_jurusan = 0
+        self.total_col = 0
     
     def databaseChecking(self):
         nama_file = 'score_science.csv' if self.type_jurusan == 'science' else 'score_humanities.csv'
@@ -28,10 +30,11 @@ class CBR:
 
         df_all = pd.merge(df_jurusan, df_univ, on='id_university')
         df_all = df_all[df_all['university_name'] == self.nama_univ]
-        
+        self.kapasitas_jurusan = df_all['capacity'][0]
+
         return df_all['id_major'].values
         
-    def suggest_euclidean(self):
+    def count_average(self, indexing):
          # db for filter major get major id
         db_major = self.filter_major()
         
@@ -39,32 +42,33 @@ class CBR:
         db_result = self.databaseChecking()
         
         cols_to_exclude = ['id_first_major', 'id_first_university', 
-                   'id_second_major', 'id_second_university', 'id_user']
+                   'id_second_major', 'id_second_university', 'id_user', 'Unnamed: 0']
         
-        db_result = db_result[db_result['id_first_major'].isin(db_major)]
+        db_result = db_result[db_result['id_first_major' if indexing < 1 else 'id_second_major'].isin(db_major)]
         cols = [col for col in db_result.columns if col not in cols_to_exclude]
         db_result = db_result[cols]
+        db_result['average'] = db_result.sum(axis=1) / 7
+        self.total_col = len(db_result.columns) - 1
 
+        return db_result.sort_values(by='average', ascending=False)
+    
+    def passing_grade(self):
+        user_input_avg = np.sum(self.query_user)
+        myArr = []
 
-        return db_result
-
-# Dummy numerical data (replace this with your actual numerical data)
-# database_data = np.random.rand(100, 10)  # feature
-
-# Feature extraction: Use the raw numerical data as features
-# database_features = database_data
-
-# Query processing: Generate a random query instance
-# query_instance = np.random.rand(10)  # Query with 10 numerical features
-
-# Similarity measurement: Compute similarity scores using Euclidean distance
-# distances = euclidean_distances([query_instance], database_features)[0]
-
-# Result retrieval: Retrieve top k most similar instances
-k = 5
-# most_similar_indices = np.argsort(distances)[:k]
-# most_similar_instances = database_data[most_similar_indices]
-
-# Display the most similar instances
-# print("Most similar instances:")
-# print(most_similar_instances)
+        for i in range(self.iterasi):
+            dictionary = {}
+            list_data = self.count_average(i)
+            avg = user_input_avg / len(list_data.columns)
+            listDataAvg = list_data['average'].values 
+            listDataAvg = np.append(listDataAvg, avg)
+            listDataAvg = sorted(listDataAvg)
+            howKnowIndex = listDataAvg.index(avg) + 1
+            if howKnowIndex > self.kapasitas_jurusan:
+                dictionary['Pilihan pertama'] = f'Coba lagi!! \n Berdasarkan jumlah pesaing dan rata-rata, nilai anda belum memenuhi yaitu berada di peringkat {howKnowIndex}/{len(listDataAvg) + 1}'
+            else:
+                dictionary['Pilihan kedua'] = f'Selamat!! \n Berdasarkan jumlah pesaing dan rata-rata, nilai anda telah memenuhi yaitu berada di peringkat {howKnowIndex}/{len(listDataAvg) + 1}'
+            
+            myArr.append(dictionary)
+            
+        return dictionary
