@@ -30,6 +30,7 @@ class CBR:
 
         df_all = pd.merge(df_jurusan, df_univ, on='id_university')
         df_all = df_all[df_all['university_name'] == self.nama_univ]
+    
         self.kapasitas_jurusan = df_all['capacity'][0]
 
         return df_all['id_major'].values

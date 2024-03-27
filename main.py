@@ -34,7 +34,7 @@ def mainly():
             myData = myData.soshum()
         
         elif ask_require_data == 5:
-            ask_more_type = str(input('tipe jurusan (science/humanity) ? : '))
+            ask_more_type = str(input('tipe jurusan (science/humanities) ? : '))
             ask_more_major = str(input('Apakah jurusan tujuanmu ? : ')).upper()
             ask_more_univ = str(input('Apakah universitas tujuanmu ? : ')).upper()
             ask_more_result = input('List nilai ? : ')
@@ -44,7 +44,7 @@ def mainly():
         
         elif ask_require_data == 6:
             ask_more_result = input('List nilai ? : ')
-            ask_more_type = str(input('tipe jurusan (science/humanity) ? : '))
+            ask_more_type = str(input('tipe jurusan (science/humanities) ? : '))
             ask_more_result = ast.literal_eval(ask_more_result)
             myData = CBR(ask_more_result, ask_more_type, None, None)
             myData = myData.recommendation()
