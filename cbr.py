@@ -1,5 +1,5 @@
 import numpy as np, pandas as pd
-from sklearn.metrics.pairwise import euclidean_distances
+from sklearn.metrics.pairwise import cosine_similarity
 from data_preprocess import Dataset
 
 class CBR:
@@ -65,10 +65,44 @@ class CBR:
             listDataAvg = sorted(listDataAvg)
             howKnowIndex = listDataAvg.index(avg) + 1
             if howKnowIndex > self.kapasitas_jurusan:
-                dictionary['Pilihan pertama'] = f'Coba lagi!! \n Berdasarkan jumlah pesaing dan rata-rata, nilai anda belum memenuhi yaitu berada di peringkat {howKnowIndex}/{len(listDataAvg) + 1}'
+                dictionary['Pilihan > kapasitas jurusan'] = f'Coba lagi!! \n Berdasarkan jumlah pesaing dan rata-rata, nilai anda belum memenuhi yaitu berada di peringkat {howKnowIndex}/{len(listDataAvg) + 1}'
             else:
-                dictionary['Pilihan kedua'] = f'Selamat!! \n Berdasarkan jumlah pesaing dan rata-rata, nilai anda telah memenuhi yaitu berada di peringkat {howKnowIndex}/{len(listDataAvg) + 1}'
+                dictionary['Pilihan lain'] = f'Selamat!! \n Berdasarkan jumlah pesaing dan rata-rata, nilai anda telah memenuhi yaitu berada di peringkat {howKnowIndex}/{len(listDataAvg) + 1}'
             
             myArr.append(dictionary)
             
         return dictionary
+
+    def recommendation(self):
+        db = self.databaseChecking()
+        cols_to_exclude = ['id_first_major', 'id_first_university', 
+                   'id_second_major', 'id_second_university', 'id_user', 'Unnamed: 0']
+       
+        cols = [col for col in db.columns if col not in cols_to_exclude]
+        db_result = db[cols]
+
+        # Define two sets of numeric vectors (2D data)
+        vectors1 = np.array(db_result.values)
+        vectors2 = np.array([self.query_user])
+
+        # Compute cosine similarity
+        similarity_matrix = cosine_similarity(vectors1, vectors2)
+        max_index = np.argmax(similarity_matrix)
+        id_first_major = db['id_first_major'][max_index]
+        id_sec_major = db['id_second_major'][max_index]
+        list_id_major = [id_first_major, id_sec_major]
+
+        id_first_university = db['id_first_university'][max_index]
+        id_second_university = db['id_first_university'][max_index]
+        list_id_univ = [id_first_university, id_second_university]
+
+        df_univ = pd.read_csv('dataset/universities.csv')
+        
+        df_univ = df_univ[df_univ['id_university'].isin(list_id_univ)]
+
+        df_majors = pd.read_csv('dataset/majors.csv')
+        df_majors = df_majors[df_majors['id_major'].isin(list_id_major)]
+
+        print('-- Univ rekomendasi -- \n', ' , '.join(df_univ['university_name'].values))
+        print('-- Jurusan rekomendasi -- \n', ' , '.join(df_majors['major_name'].values))
+

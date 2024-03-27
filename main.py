@@ -11,6 +11,7 @@ def mainly():
           3. Nilai tertinggi Saintek tahun lalu
           4. Nilai tertinggi Soshum tahun lalu
           5. CEK PASSING GRADE
+          6. REKOMENDASI
           0. BACK
     """)
 
@@ -38,9 +39,15 @@ def mainly():
             ask_more_univ = str(input('Apakah universitas tujuanmu ? : ')).upper()
             ask_more_result = input('List nilai ? : ')
             ask_more_result = ast.literal_eval(ask_more_result)
-            print(ask_more_result)
             myData = CBR(ask_more_result, ask_more_type, ask_more_major, ask_more_univ)
             myData = myData.passing_grade()
+        
+        elif ask_require_data == 6:
+            ask_more_result = input('List nilai ? : ')
+            ask_more_type = str(input('tipe jurusan (science/humanity) ? : '))
+            ask_more_result = ast.literal_eval(ask_more_result)
+            myData = CBR(ask_more_result, ask_more_type, None, None)
+            myData = myData.recommendation()
         else:
             return False
 
