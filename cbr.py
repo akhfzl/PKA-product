@@ -29,9 +29,12 @@ class CBR:
         df_univ = pd.read_csv('dataset/universities.csv')
 
         df_all = pd.merge(df_jurusan, df_univ, on='id_university')
-        df_all = df_all[df_all['university_name'] == self.nama_univ]
+        df_all = df_all[df_all['university_name'].str.contains(rf'{self.nama_univ}')]
+        
+        if len(df_all['university_name'].values) == 0:
+            print('Univ dan jurusan tidak ditemukan')
     
-        self.kapasitas_jurusan = df_all['capacity'][0]
+        self.kapasitas_jurusan = df_all['capacity'].values[0]
 
         return df_all['id_major'].values
         
@@ -63,12 +66,12 @@ class CBR:
             avg = user_input_avg / len(list_data.columns)
             listDataAvg = list_data['average'].values 
             listDataAvg = np.append(listDataAvg, avg)
-            listDataAvg = sorted(listDataAvg)
+            listDataAvg = sorted(listDataAvg, reverse=True)
             howKnowIndex = listDataAvg.index(avg) + 1
             if howKnowIndex > self.kapasitas_jurusan:
-                dictionary['Pilihan > kapasitas jurusan'] = f'Coba lagi!! \n Berdasarkan jumlah pesaing dan rata-rata, nilai anda belum memenuhi yaitu berada di peringkat {howKnowIndex}/{len(listDataAvg) + 1}'
-            else:
-                dictionary['Pilihan lain'] = f'Selamat!! \n Berdasarkan jumlah pesaing dan rata-rata, nilai anda telah memenuhi yaitu berada di peringkat {howKnowIndex}/{len(listDataAvg) + 1}'
+                dictionary[f'Pilihan > {self.kapasitas_jurusan}'] = f'Coba lagi!! \n Berdasarkan jumlah pesaing dan rata-rata, nilai anda belum memenuhi yaitu berada di peringkat {howKnowIndex}/{len(listDataAvg) + 1}'
+            if howKnowIndex <= self.kapasitas_jurusan:
+                dictionary[f'Pilihan < {self.kapasitas_jurusan}'] = f'Selamat!! \n Berdasarkan jumlah pesaing dan rata-rata, nilai anda telah memenuhi yaitu berada di peringkat {howKnowIndex}/{len(listDataAvg) + 1}'
             
             myArr.append(dictionary)
             
